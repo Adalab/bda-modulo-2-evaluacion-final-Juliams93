@@ -253,3 +253,59 @@ film.title;
 
 -- Ejercicio 23: Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría "Horror". 
 -- Utiliza una subconsulta para encontrar los actores que han actuado en películas de la categoría "Horror" y luego exclúyelos de la lista de actores.
+
+SELECT 
+first_name,
+last_name
+FROM actor
+WHERE actor.actor_id NOT IN (
+        SELECT DISTINCT film_actor.actor_id
+        FROM film_actor 
+        INNER JOIN 
+		film_category
+        ON film_actor.film_id = film_category.film_id
+        INNER JOIN category 
+        ON film_category.category_id = category.category_id
+        WHERE category.name = 'Horror'
+    )
+ORDER BY 
+actor.first_name,
+actor.last_name;
+
+--  Ejercicio 24: Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 minutos en la tabla film.
+
+SELECT 
+film.title AS Titulo
+FROM film
+INNER JOIN film_category
+ON film.film_id = film_category.film_id
+INNER JOIN category
+ON film_category.category_id = category.category_id
+WHERE category.name = 'Comedy' 
+AND film.length > 180
+ORDER BY 
+film.title;
+
+-- Ejercicio 25: Encuentra todos los actores que han actuado juntos en al menos una película. La consulta debe mostrar el nombre y apellido de los actores
+-- y el número de películas en las que han actuado juntos.
+
+SELECT 
+actor.first_name AS Nombre_Actor1,
+actor.last_name AS Apellido_Actor1,
+actor2.first_name AS Nombre_Actor2,
+actor2.last_name AS Apellido_Actor2,
+COUNT(film_actor.film_id) AS NumeroPeliculas
+FROM actor
+INNER JOIN film_actor 
+ON actor.actor_id = film_actor.actor_id
+INNER JOIN film_actor film_actor2 
+ON film_actor.film_id = film_actor2.film_id
+INNER JOIN actor actor2 
+ON film_actor2.actor_id = actor2.actor_id
+WHERE actor.actor_id < actor2.actor_id -- Evita duplicados y que un actor se compare consigo mismo
+GROUP BY 
+actor.first_name, actor.last_name, actor2.first_name, actor2.last_name
+HAVING 
+COUNT(film_actor.film_id) > 0
+ORDER BY 
+NumeroPeliculas DESC;
